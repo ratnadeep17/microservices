@@ -24,7 +24,7 @@ public class CatalogResource {
 
 	@GetMapping("/test")
 	public String test() {
-		return "Hello from movie catalog..............................................";
+		return "Hello from movie catalog service";
 	}
 
 	@GetMapping("/user/{userId}")
