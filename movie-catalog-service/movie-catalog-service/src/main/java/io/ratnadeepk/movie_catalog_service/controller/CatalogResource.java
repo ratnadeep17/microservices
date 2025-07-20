@@ -16,11 +16,11 @@ import org.springframework.web.client.RestTemplate;
 import io.ratnadeepk.movie_catalog_service.model.CatalogItem;
 import io.ratnadeepk.movie_catalog_service.model.Movie;
 import io.ratnadeepk.movie_catalog_service.model.Rating;
+import io.ratnadeepk.movie_catalog_service.model.UserRatings;
 
 @RestController
 @RequestMapping("/catalog/api")
 public class CatalogResource {
-
 
 	@GetMapping("/test")
 	public String test() {
@@ -30,20 +30,18 @@ public class CatalogResource {
 	@GetMapping("/user/{userId}")
 	public List<CatalogItem> getCatalogItem(@PathVariable("userId") String userId) {
 		RestTemplate restTemplate = new RestTemplate();
-		
+		// get all ratings
+		UserRatings ratings = restTemplate.getForObject("http://localhost:8082/ratingsdata/api/user/" + userId,
+				UserRatings.class);
 		// get all rated movie ID's
-		List<Rating> ratings = Arrays.asList(new Rating("12345", 4), new Rating("45678", 5));
-
-		return ratings.stream().map(rating -> {
-			Movie movie = restTemplate.getForObject("http://localhost:8083/movies/api/" + rating.getMovieId() , Movie.class);
+		return ratings.getRatings().stream().map(rating -> {
+			// For each movieId call movie info service and get details
+			Movie movie = restTemplate.getForObject("http://localhost:8083/movies/api/" + rating.getMovieId(),
+					Movie.class);
+			// Put them all together
 			return new CatalogItem(movie.getName(), movie.getDesc(), rating.getRating());
-					}).collect(Collectors.toList()
-		);
-		
+		}).collect(Collectors.toList());
 
-		// For each movieId call movie info service and get details
-
-		// Put them all together
 	}
 
 }
